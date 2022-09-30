@@ -1,6 +1,6 @@
-"use strict";
 
-var Service, Characteristic;
+
+let Service, Characteristic;
 
 const child_process = require('child_process');
 const converter = require('color-convert');
@@ -12,17 +12,21 @@ module.exports = function(homebridge) {
 	Service = homebridge.hap.Service;
 	Characteristic = homebridge.hap.Characteristic;
 
-	homebridge.registerAccessory('homebridge-rgb-led', 'rgb-led-system', RgbLedAccessory);
+	homebridge.registerAccessory(
+		"homebridge-rgb-led",
+		"rgb-led-system",
+		RgbLedAccessory
+	);
 }
 
 function RgbLedAccessory(log, config) {
 	this.log      = log;
-	this.name     = config['name'];
+	this.name     = config.name;
 
 
-	this.ip     = config['ip'];
-	this.token     = config['token'];
-	this.vpin     = config['vpin'];
+	this.ip     = config.ip;
+	this.token     = config.token;
+	this.vpin     = config.vpin;
 
 	this.enabled = true ;
 
@@ -38,62 +42,64 @@ function RgbLedAccessory(log, config) {
 		this.log("homebridge-rgb-ledstrip won't work until you fix this problem");
 		this.enabled = false;
 	}
+	
+	this.rgbLedStripService = new Service.Lightbulb(this.name);
+
+	this.rgbLedStripService
+		.getCharacteristic(Characteristic.On)
+		.onGet(this.getToggleState.bind(this, "on"))
+		.onSet(this.setToggleState.bind(this, "on"))
+
+	this.rgbLedStripService
+		.addCharacteristic(new Characteristic.Brightness())
+		.onGet(this.getToggleState.bind(this, "brightness"))
+		.onSet(this.setToggleState.bind(this, "brightness"))
+
+	this.rgbLedStripService
+		.addCharacteristic(new Characteristic.Hue())
+		.onGet(this.getToggleState.bind(this, "hue"))
+		.onSet(this.setToggleState.bind(this, "hue"))
+
+	this.rgbLedStripService
+		.addCharacteristic(new Characteristic.Saturation())
+		.onGet(this.getToggleState.bind(this, "saturation"))
+		.onSet(this.setToggleState.bind(this, "saturation"))
+	
+	// Accessory information
+	this.accessoryInformationService = new Service.AccessoryInformation();
+
+	this.accessoryInformationService.setCharacteristic(
+		Characteristic.Identify,
+		true
+	);
+	this.accessoryInformationService.setCharacteristic(
+		Characteristic.Manufacturer,
+		"Domi"
+	);
+	this.accessoryInformationService.setCharacteristic(
+		Characteristic.Model,
+		"DIY"
+	);
+	this.accessoryInformationService.setCharacteristic(
+		Characteristic.Name,
+		"homebridge-rgb-led"
+	);
+	this.accessoryInformationService.setCharacteristic(
+		Characteristic.SerialNumber,
+		"S3CUR1TYSYST3M"
+	);
+	this.accessoryInformationService.setCharacteristic(
+		Characteristic.FirmwareRevision,
+		packageJson.version
+	);
+
+	// Services list
+	this.services = [this.service, this.accessoryInformationService];
+	this.services.push(this.rgbLedStripService)
 
 }
-
-RgbLedAccessory.prototype = {
-
-	getServices : function(){
-
-		if(this.enabled){
-			this.on = 0
-			this.brightness = 0
-			this.hue = 0
-			this.saturation = 0
-		
-			let informationService = new Service.AccessoryInformation();
-
-			informationService
-				.setCharacteristic(Characteristic.Manufacturer, 'misi')
-				.setCharacteristic(Characteristic.Model, 'RGB-LedStrip')
-				.setCharacteristic(Characteristic.SerialNumber, '06-06-00');
-
-			let rgbLedStripService = new Service.Lightbulb(this.name);
-
-			rgbLedStripService
-				.getCharacteristic(Characteristic.On)
-				.onGet(this.getToggleState.bind(this, "on"))
-				.onSet(this.setToggleState.bind(this, "on"))
-
-			rgbLedStripService
-				.addCharacteristic(new Characteristic.Brightness())
-				.onGet(this.getToggleState.bind(this, "brightness"))
-				.onSet(this.setToggleState.bind(this, "brightness"))
-
-			rgbLedStripService
-				.addCharacteristic(new Characteristic.Hue())
-				.onGet(this.getToggleState.bind(this, "hue"))
-				.onSet(this.setToggleState.bind(this, "hue"))
-
-			rgbLedStripService
-				.addCharacteristic(new Characteristic.Saturation())
-				.onGet(this.getToggleState.bind(this, "saturation"))
-				.onSet(this.setToggleState.bind(this, "saturation"))
-
-			this.informationService = informationService;
-			this.rgbLedStripService = rgbLedStripService;
-
-			this.log("RgbLedStrip has been successfully initialized!");
-
-			return [informationService, rgbLedStripService];
-		}else{
-			this.log("RgbLedStrip has not been initialized, please check your logs.");
-			return [];
-		}
-
-  },
   
-	getToggleState : function(characteristicName){
+RgbLedAccessory.prototype.getToggleState = function(characteristicName){
 		switch(characteristicName){
 			case "on":
 				return this.on
@@ -104,9 +110,9 @@ RgbLedAccessory.prototype = {
 			case "saturation":
 				return this.saturation
 		}
-	},
+	}
 	
-	setToggleState : function(characteristicName, value){
+RgbLedAccessory.prototype.setToggleState = function(characteristicName, value){
 		switch(characteristicName){
 			case "on":
 				this.on = value
@@ -128,23 +134,25 @@ RgbLedAccessory.prototype = {
 		}
 		var rgb = converter.hsv.rgb([this.hue, this.saturation, this.brightness])
 		this.updateRGB(rgb[0], rgb[1], rgb[2])
-	},
-
-	updateRGB : function(red, green, blue){
-
-		var dataValue = blue + "\",\"" + green + "\",\"" + red;
-		fetch("http://" + this.ip + ":8080/" + this.token + "/update/V" + this.vpin + "?value=" + dataValue)
-			.then((response) => {  
-				if (response.ok === false) {
-					throw new Error(`Status code (${response.status})`)
-				}
-			})
-				.catch((error) => {
-					this.log.error(`Request to webhook failed. (${path})`)
-					this.log.error(error);
-			});
-
-		this.log("Setting RGB values to: Red: "+red + " Green: "+green+ " Blue: "+blue)
-
 	}
+
+RgbLedAccessory.prototype.updateRGB = function(red, green, blue){
+	let dataValue = blue + "\",\"" + green + "\",\"" + red;
+	fetch("http://" + this.ip + ":8080/" + this.token + "/update/V" + this.vpin + "?value=" + dataValue)
+		.then((response) => {  
+			if (response.ok === false) {
+				throw new Error(`Status code (${response.status})`)
+			}
+		})
+			.catch((error) => {
+				this.log.error(`Request to webhook failed. (${path})`)
+				this.log.error(error);
+		});
+
+	this.log("Setting RGB values to: Red: "+red + " Green: "+green+ " Blue: "+blue)
+
 }
+
+RgbLedAccessory.prototype.getServices = function(){
+	return this.services;
+};

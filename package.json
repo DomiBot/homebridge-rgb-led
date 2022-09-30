@@ -1,7 +1,7 @@
 {
   "name": "homebridge-rgb-led",
   "displayName": "Homebridge RGB Led System",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "LED RGB plugin for Homebridge",
   "main": "index.js",
   "scripts": {
