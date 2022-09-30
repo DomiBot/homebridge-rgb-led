@@ -3,7 +3,7 @@
     "pluginType": "accessory",
     "singular": true,
     "headerDisplay": "Blynk LED RGB plugin for Homebridge.",
-    "footerDisplay": "Raise [Issues](https://github.com/DomiBot/homebridge-rgb-led/issues).",
+    
     "schema": {
         "type": "object",
         "properties": {
@@ -36,5 +36,11 @@
                 "description": "GPIO pin that is used to set blue channel."
             }
         }
-    }
+    },
+	"layout": [
+    "name",
+	"ip",
+	"token",
+	"vpin"
+  ]
 }
