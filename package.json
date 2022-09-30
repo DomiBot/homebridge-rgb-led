@@ -3,7 +3,7 @@
   "displayName": "Homebridge RGB Led System",
   "version": "1.0.2",
   "description": "LED RGB plugin for Homebridge",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "npm install -g && homebridge -I -D",
     "build": "exit 0"
