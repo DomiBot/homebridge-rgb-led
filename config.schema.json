@@ -1,0 +1,40 @@
+{
+    "pluginAlias": "rgb-led-system",
+    "pluginType": "accessory",
+    "singular": true,
+    "headerDisplay": "Blynk LED RGB plugin for Homebridge.",
+    "footerDisplay": "Raise [Issues](https://github.com/DomiBot/homebridge-rgb-led/issues).",
+    "schema": {
+        "type": "object",
+        "properties": {
+            "name": {
+                "title": "Name",
+                "type": "string",
+                "required": true,
+                "default": "LED Strip",
+                "description": "A unique name for the accessory. It will be used as the accessory name in HomeKit."
+            },
+            "ip": {
+                "title": "Blynk server ip local",
+                "type": "string",
+                "required": true,
+                "placeholder": "0.0.0.0",
+                "description": "GPIO pin that is used to set red channel."
+            },
+            "token": {
+                "title": "Blynk Token",
+                "type": "string",
+                "required": true,
+                "placeholder": "put token",
+                "description": "GPIO pin that is used to set green channel."
+            },
+            "vpin": {
+                "title": "Blue Pin",
+                "type": "integer",
+                "required": true,
+                "placeholder": "put virtual pin here",
+                "description": "GPIO pin that is used to set blue channel."
+            }
+        }
+    }
+}
