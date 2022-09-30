@@ -12,17 +12,17 @@ module.exports = function(homebridge) {
 	Service = homebridge.hap.Service;
 	Characteristic = homebridge.hap.Characteristic;
 
-	homebridge.registerAccessory('homebridge-rgb-led', 'rgb-led-system', RgbLedStripAccessory);
+	homebridge.registerAccessory('homebridge-rgb-led', 'rgb-led-system', RgbLedAccessory);
 }
 
-function RgbLedStripAccessory(log, config) {
+function RgbLedAccessory(log, config) {
 	this.log      = log;
-	this.name     = config.name;
+	this.name     = config['name'];
 
 
-	this.ip     = config.ip;
-	this.token     = config.token;
-	this.vpin     = config.vpin;
+	this.ip     = config['ip'];
+	this.token     = config['token'];
+	this.vpin     = config['vpin'];
 
 	this.enabled = true ;
 
@@ -41,7 +41,7 @@ function RgbLedStripAccessory(log, config) {
 
 }
 
-RgbLedStripAccessory.prototype = {
+RgbLedAccessory.prototype = {
 
 	getServices : function(){
 
